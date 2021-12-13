@@ -54,7 +54,9 @@ public abstract class AbstractHandshakeListener extends HandshakeListener {
 				} catch (Throwable t) {
 					LogManager.getLogger().debug("Failed to check connection throttle", t);
 				}
-				if (packethandshakinginsetprotocol.b() != ProtocolVersion.getLatest().getId()) {
+				//quick hack to prevent older versions from being able to log in.
+				if (packethandshakinginsetprotocol.b() != ProtocolVersion.getLatest().getId() ||
+					packethandshakinginsetprotocol.b() != ProtocolVersion.MINECRAFT_1_7_10.getId()){
 					final ChatComponentText chatcomponenttext = new ChatComponentText("Unsupported protocol version "+packethandshakinginsetprotocol.b());
 					this.networkManager.handle(new PacketLoginOutDisconnect(chatcomponenttext));
 					this.networkManager.close(chatcomponenttext);
