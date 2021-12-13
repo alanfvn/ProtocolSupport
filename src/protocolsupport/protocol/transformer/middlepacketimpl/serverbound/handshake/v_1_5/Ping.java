@@ -24,7 +24,7 @@ public class Ping extends ServerBoundMiddlePacket {
 	public RecyclableCollection<Packet<?>> toNative() throws Exception {
 		RecyclableArrayList<Packet<?>> packets = RecyclableArrayList.create();
 		PacketCreator hsscreator = PacketCreator.create(ServerBoundPacket.HANDSHAKE_START.get());
-		hsscreator.writeVarInt(ProtocolVersion.getLatest().getId());
+		hsscreator.writeVarInt(ProtocolVersion.MINECRAFT_1_5_1.getId());
 		hsscreator.writeString("");
 		hsscreator.writeShort(Bukkit.getPort());
 		hsscreator.writeVarInt(1);

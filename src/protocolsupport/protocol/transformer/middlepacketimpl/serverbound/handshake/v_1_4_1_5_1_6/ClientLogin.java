@@ -27,7 +27,12 @@ public class ClientLogin extends ServerBoundMiddlePacket {
 	public RecyclableCollection<Packet<?>> toNative() throws Exception {
 		RecyclableArrayList<Packet<?>> packets = RecyclableArrayList.create();
 		PacketCreator hsscreator = PacketCreator.create(ServerBoundPacket.HANDSHAKE_START.get());
-		hsscreator.writeVarInt(ProtocolVersion.getLatest().getId());
+
+		/*
+			WIP horrible way to prevent
+			clients older than 1.7 to join....
+		 */
+		hsscreator.writeVarInt(ProtocolVersion.MINECRAFT_1_6_4.getId());
 		hsscreator.writeString(hostname);
 		hsscreator.writeShort(port);
 		hsscreator.writeVarInt(2);
