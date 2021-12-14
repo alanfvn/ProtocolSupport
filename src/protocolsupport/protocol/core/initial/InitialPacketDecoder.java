@@ -98,35 +98,14 @@ public class InitialPacketDecoder extends SimpleChannelInboundHandler<ByteBuf> {
 		try {
 			ProtocolVersion handshakeversion = null;
 			switch (firstbyte) {
+				case 0x02:
 				case 0xFE: { //old ping or a part of varint length
-					if (replayingBuffer.readableBytes() == 0) {
-						//no more data received, it may be old protocol, or we just not received all data yet, so delay assuming as really old protocol for some time
-						scheduleTask(ctx, new SetProtocolTask(this, channel, ProtocolVersion.MINECRAFT_LEGACY), pingLegacyDelay, TimeUnit.MILLISECONDS);
-					} else if (replayingBuffer.readUnsignedByte() == 1) {
-						//1.5-1.6 ping or maybe a finishing byte for 1.7+ packet length
-						if (replayingBuffer.readableBytes() == 0) {
-							//no more data received, it may be 1.5.2 or we just didn't receive 1.6 or 1.7+ data yet, so delay assuming as 1.5.2 for some time
-							scheduleTask(ctx, new SetProtocolTask(this, channel, ProtocolVersion.MINECRAFT_1_5_2), ping152delay, TimeUnit.MILLISECONDS);
-						} else if (
-							(replayingBuffer.readUnsignedByte() == 0xFA) &&
-							"MC|PingHost".equals(new String(ChannelUtils.toArray(replayingBuffer.readBytes(replayingBuffer.readUnsignedShort() * 2)), StandardCharsets.UTF_16BE))
-						) {
-							//definitely 1.6
-							replayingBuffer.readUnsignedShort();
-							handshakeversion = ProtocolUtils.get16PingVersion(replayingBuffer.readUnsignedByte());
-						} else {
-							//it was 1.7+ handshake after all
-							//hope that there won't be any handshake packet with id 0xFA in future because it will be more difficult to support it
-							handshakeversion = attemptDecodeNettyHandshake(replayingBuffer);
-						}
-					} else {
-						//1.7+ handshake
-						handshakeversion = attemptDecodeNettyHandshake(replayingBuffer);
+					//scheduleTask(ctx, new SetProtocolTask(this, channel, ProtocolVersion.MINECRAFT_LEGACY), 1, TimeUnit.MILLISECONDS);
+					try {
+						this.setProtocol(channel, ProtocolVersion.MINECRAFT_LEGACY);
+					} catch (Exception t) {
+						channel.pipeline().firstContext().fireExceptionCaught(t);
 					}
-					break;
-				}
-				case 0x02: { // <= 1.6.4 handshake
-					handshakeversion = ProtocolUtils.readOldHandshake(replayingBuffer);
 					break;
 				}
 				default: { // >= 1.7 handshake
@@ -138,7 +117,7 @@ public class InitialPacketDecoder extends SimpleChannelInboundHandler<ByteBuf> {
 			if (handshakeversion != null) {
 				setProtocol(channel, handshakeversion);
 			}
-		} catch (EOFSignal ex) {
+		} catch (EOFSignal ignored) {
 		}
 	}
 

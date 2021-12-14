@@ -92,6 +92,7 @@ public class StatusListener extends net.minecraft.server.v1_8_R3.PacketStatusLis
 		gprofiles = Arrays.copyOfRange(gprofiles, 0, Math.min(gprofiles.length, SpigotConfig.playerSample));
 		playerSample.a(gprofiles);
 
+
 		ServerPing serverping = new ServerPing();
 		serverping.setFavicon(icon);
 		serverping.setMOTD(new ChatComponentText(motd));
